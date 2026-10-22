@@ -1,0 +1,88 @@
+import heapq
+
+maze = [
+    [0, 0, 0],
+    [1, 1, 0],
+    [0, 0, 0]
+]
+
+start = (0, 0)
+goal = (2, 2)
+
+
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+
+pq = [(heuristic(start, goal), start)]
+visited = set()
+parent = {}
+g_cost = {start: 0}
+
+while pq:
+    cost, current = heapq.heappop(pq)
+
+    if current in visited:
+        continue
+
+    visited.add(current)
+
+    if current == goal:
+        break
+
+    x, y = current
+
+    for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+        nx, ny = x + dx, y + dy
+
+        if 0 <= nx < 3 and 0 <= ny < 3 and maze[nx][ny] == 0:
+            neighbor = (nx, ny)
+            new_cost = g_cost[current] + 1
+
+            if new_cost < g_cost.get(neighbor, float("inf")):
+                g_cost[neighbor] = new_cost
+                parent[neighbor] = current
+
+                f_cost = new_cost + heuristic(neighbor, goal)
+                heapq.heappush(pq, (f_cost, neighbor))
+
+
+
+if goal in visited:
+    path = []
+    node = goal
+
+    while node != start:
+        path.append(node)
+        node = parent[node]
+
+    path.append(start)
+    path.reverse()
+
+    print("Shortest Path:", path)
+
+    display = [row[:] for row in maze]
+
+    for x, y in path:
+        display[x][y] = "*"
+
+    display[start[0]][start[1]] = "S"
+    display[goal[0]][goal[1]] = "G"
+
+    print("\nMaze Visualization:\n")
+
+    for row in display:
+        for cell in row:
+            if cell == 1:
+                print("#", end=" ")
+            elif cell == "*":
+                print("*", end=" ")
+            elif cell == "S":
+                print("S", end=" ")
+            elif cell == "G":
+                print("G", end=" ")
+            else:
+                print(".", end=" ")
+        print()
+else:
+    print("No path found.")
